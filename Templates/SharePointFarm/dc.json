@@ -149,7 +149,7 @@
       }
     ],
     "creatingPublicIPUrl": "[concat(parameters('localUrl'),'/creatingPublicIP.json')]",
-    "CreatingAvailabilitySetUrl": "[concat(parameters('localUrl'),'/availabilitySets.json')]",
+    "CreatingAvailabilitySetUrl": "[concat(parameters('localUrl'),'/availabilitySet.json')]",
     "setupLBUrl": "[concat(parameters('localUrl'),'/loadBalancer.json')]",
     "creatingNICUrl": "[concat(parameters('localUrl'),'/creatingNIC.json')]",
     "ProvisioningADDomainControllerUrl": "[concat(parameters('localUrl'),'/provisioningDomainController.json')]",
