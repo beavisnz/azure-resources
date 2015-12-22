@@ -95,7 +95,7 @@
         "artifactsBaseUrl": "",
         "description": "URL to acquire other templates"
       },
-      "defaultValue": "C:/Users/BevanDavis/OneDrive - Sysdoc NZ/Azure/Templates/SharePointFarm"
+      "defaultValue": "https://raw.githubusercontent.com/beavisnz/azure-resources/master/Templates/SharePointFarm"
     },
     "storageAccountName": {
       "type": "string",
