@@ -56,7 +56,7 @@
       "metadata": {
         "description": "The IP address of the new SP VM"
       },
-      "defaultValue": "10.0.1.4"
+      "defaultValue": "10.0.2.4"
     },
     "adminUsername": {
       "type": "string",
@@ -117,6 +117,8 @@
     "LBFE": "LBFE",
     "LBBE": "LBBE",
     "RDPNAT": "RDP",
+    "spWebNAT": "spWeb",
+    "spCANAT": "spCentralAdmin",
     "spNicName": "spNic",
     "adSubnetName": "adSubnet",
     "sqlSubnetName": "sqlSubnet",
@@ -158,35 +160,12 @@
     ],
     "creatingPublicIPUrl": "[concat(parameters('localUrl'),'/creatingPublicIP.json')]",
     "CreatingAvailabilitySetUrl": "[concat(parameters('localUrl'),'/availabilitySet.json')]",
-    "setupLBUrl": "[concat(parameters('localUrl'),'/loadBalancer.json')]",
+    "setupLBUrl": "[concat(parameters('localUrl'),'/spLoadBalancer.json')]",
     "creatingNICUrl": "[concat(parameters('localUrl'),'/creatingNIC.json')]",
     "SettingUpSharepointIPUrl": "[concat(parameters('localUrl'),'/publicip-new.json')]",
     "provisioningSharepointUrl": "[concat(parameters('localUrl'),'/provisioningSharepoint.json')]"
   },
   "resources": [
-    {
-      "name": "SettingUpPublicIP",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('creatingPublicIPUrl')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "publicIPAddressName": {
-            "value": "[variables('sppublicIPAddressName')]"
-          },
-          "publicIPAddressType": {
-            "value": "[variables('publicIPAddressType')]"
-          }
-        }
-      }
-    },
     {
       "name": "CreatingAvailabilitySet",
       "type": "Microsoft.Resources/deployments",
@@ -222,7 +201,7 @@
             "value": "[parameters('location')]"
           },
           "publicIpAddressName": {
-            "value": "[parameters('sppublicIPAddressName')]"
+            "value": "[variables('sppublicIPAddressName')]"
           },
           "publicIPAddressType": {
             "value": "[variables('publicIPAddressType')]"
@@ -238,8 +217,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/SettingUpSharepointIP",
-        "Microsoft.Resources/deployments/SettingUpPublicIP"
+        "Microsoft.Resources/deployments/SettingUpSharepointIP"
       ],
       "properties": {
         "mode": "Incremental",
@@ -264,7 +242,13 @@
             "value": "[variables('splbName')]"
           },
           "publicIpResourceId": {
-            "value": "[reference('SettingUpPublicIP').outputs.publicIpResourceId.value]"
+            "value": "[reference('SettingUpSharepointIP').outputs.publicIpId.value]"
+          },
+          "spWebNAT": {
+            "value": "[variables('spWebNAT')]"
+          },
+          "spCANAT": {
+            "value": "[variables('spCANAT')]"
           }
         }
       }
@@ -315,6 +299,8 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
+        "Microsoft.Resources/deployments/SettingUpSharepointIP",
+        "Microsoft.Resources/deployments/CreatingNetworkInterface"
       ],
       "properties": {
         "mode": "Incremental",
@@ -357,7 +343,7 @@
   ],
   "outputs": {
     "fqdn": {
-      "value": "[reference('SettingUpSharePointIP').outputs.publicIpResourceId.value]",
+      "value": "[reference('SettingUpSharepointIP').outputs.publicIpId.value]",
       "type": "string"
     }
   }
