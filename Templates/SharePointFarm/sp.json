@@ -51,10 +51,10 @@
       },
       "defaultValue": "10.0.2.0/24"
     },
-    "sqlNicIPAddress": {
+    "spNicIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "The IP address of the new SQL VM"
+        "description": "The IP address of the new SP VM"
       },
       "defaultValue": "10.0.1.4"
     },
@@ -70,29 +70,23 @@
         "description": "The password forthe Administrator account of the new VM and Domain"
       }
     },
-    "sqlVMSize": {
+    "spVMSize": {
       "type": "string",
       "allowedValues": [
         "Standard_D1_v2",
-        "Standard_D2_v2",
+        "Standard_D2_v2"
       ],
       "metadata": {
-        "description": "The size of the SQL VM Created"
+        "description": "The size of the SP VM Created"
       },
       "defaultValue": "Standard_D2_v2"
     },
-    "sqlServerServiceAccountUserName": {
+    "spDNSPrefix": {
       "type": "string",
       "metadata": {
-        "description": "The SQL Server Service account name"
+        "description": "The DNS Prefix for the SharePoint Public IP Address"
       },
-      "defaultValue": "sqlservice"
-    },
-    "sqlServerServiceAccountPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "The SQL Server Service account password"
-      }
+      "defaultValue": "sysnzsp"
     },
     "baseUrl": {
       "type": "string",
@@ -119,29 +113,28 @@
     }
   },
   "variables": {
-    "sqlVMName": "[concat(parameters('sharepointFarmName'),'-sql')]",
+    "spVMName": "[concat(parameters('sharepointFarmName'),'-sp')]",
     "LBFE": "LBFE",
     "LBBE": "LBBE",
     "RDPNAT": "RDP",
-    "sqlNicName": "sqlNic",
+    "spNicName": "spNic",
     "adSubnetName": "adSubnet",
     "sqlSubnetName": "sqlSubnet",
     "spSubnetName": "spSubnet",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-    "sqlSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('sqlSubnetName'))]",
-    "sqlNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('sqlNicName'))]",
-    "sqlLBName": "sqlLoadBalancer",
-    "sqlIPConfigID": "[concat(variables('sqlNicId'),'/ipConfigurations/ipconfig1')]",
-    "sqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('sqlLBName'))]",
-    "sqllbFEConfigID": "[concat(variables('sqllbID'),'/frontendIPConfigurations/',variables('LBFE'))]",
-    "sqlRDPNATRuleID": "[concat(variables('sqllbID'),'/inboundNatRules/',variables('RDPNAT'))]",
-    "sqlBEAddressPoolID": "[concat(variables('sqllbID'),'/backendAddressPools/',variables('LBBE'))]",
-    "sqlDataDisk": "SQLDataDisk",
-    "sqlDataDiskSize": 1000,
-    "sqlLogDisk": "SQLLogDisk",
-    "sqlLogDiskSize": 1000,
-    "sqlpublicIPAddressName": "sqlpublicIP",
-    "sqlAvailabilitySetName": "sqlAvailabiltySet",
+    "spSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('spSubnetName'))]",
+    "spNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('spNicName'))]",
+    "spLBName": "spLoadBalancer",
+    "spIPConfigID": "[concat(variables('spNicId'),'/ipConfigurations/ipconfig1')]",
+    "splbID": "[resourceId('Microsoft.Network/loadBalancers',variables('spLBName'))]",
+    "splbFEConfigID": "[concat(variables('splbID'),'/frontendIPConfigurations/',variables('LBFE'))]",
+    "spRDPNATRuleID": "[concat(variables('splbID'),'/inboundNatRules/',variables('RDPNAT'))]",
+    "spBEAddressPoolID": "[concat(variables('splbID'),'/backendAddressPools/',variables('LBBE'))]",
+    "spDataDisk": "SPDataDisk",
+    "spDataDiskSize": 1000,
+    "sppublicIPAddressName": "sppublicIP",
+    "spAvailabilitySetName": "spAvailabiltySet",
+    "spCentralAdminPort": 8080,
     "publicIPAddressType": "Dynamic",
     "subnets": [
       {
@@ -167,7 +160,8 @@
     "CreatingAvailabilitySetUrl": "[concat(parameters('localUrl'),'/availabilitySet.json')]",
     "setupLBUrl": "[concat(parameters('localUrl'),'/loadBalancer.json')]",
     "creatingNICUrl": "[concat(parameters('localUrl'),'/creatingNIC.json')]",
-    "ProvisioningSQLUrl": "[concat(parameters('localUrl'),'/provisioningSQL.json')]"
+    "SettingUpSharepointIPUrl": "[concat(parameters('localUrl'),'/publicip-new.json')]",
+    "provisioningSharepointUrl": "[concat(parameters('localUrl'),'/provisioningSharepoint.json')]"
   },
   "resources": [
     {
@@ -185,7 +179,7 @@
             "value": "[parameters('location')]"
           },
           "publicIPAddressName": {
-            "value": "[variables('sqlpublicIPAddressName')]"
+            "value": "[variables('sppublicIPAddressName')]"
           },
           "publicIPAddressType": {
             "value": "[variables('publicIPAddressType')]"
@@ -208,7 +202,33 @@
             "value": "[parameters('location')]"
           },
           "availabilitySetName": {
-            "value": "[variables('sqlAvailabilitySetName')]"
+            "value": "[variables('spAvailabilitySetName')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "SettingUpSharepointIP",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('SettingUpSharepointIPUrl')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "publicIpAddressName": {
+            "value": "[parameters('sppublicIPAddressName')]"
+          },
+          "publicIPAddressType": {
+            "value": "[variables('publicIPAddressType')]"
+          },
+          "dnsPrefix": {
+            "value": "[parameters('spDNSPrefix')]"
           }
         }
       }
@@ -218,6 +238,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
+        "Microsoft.Resources/deployments/SettingUpSharepointIP",
         "Microsoft.Resources/deployments/SettingUpPublicIP"
       ],
       "properties": {
@@ -240,7 +261,7 @@
             "value": "[variables('RDPNAT')]"
           },
           "lbName": {
-            "value": "[variables('sqllbName')]"
+            "value": "[variables('splbName')]"
           },
           "publicIpResourceId": {
             "value": "[reference('SettingUpPublicIP').outputs.publicIpResourceId.value]"
@@ -266,19 +287,19 @@
             "value": "[parameters('location')]"
           },
           "NicName": {
-            "value": "[variables('sqlNicName')]"
+            "value": "[variables('spNicName')]"
           },
           "NicIPAddress": {
-            "value": "[parameters('sqlNicIPAddress')]"
+            "value": "[parameters('spNicIPAddress')]"
           },
           "SubnetRef": {
-            "value": "[variables('sqlSubnetRef')]"
+            "value": "[variables('spSubnetRef')]"
           },
           "BEAddressPoolID": {
-            "value": "[variables('sqlBEAddressPoolID')]"
+            "value": "[variables('spBEAddressPoolID')]"
           },
           "RDPNATRuleID": {
-            "value": "[variables('sqlRDPNATRuleID')]"
+            "value": "[variables('spRDPNATRuleID')]"
           },
           "LBBE": {
             "value": "[variables('LBBE')]"
@@ -290,58 +311,53 @@
       }
     },
     {
-      "name": "ProvisioningSQLServer",
+      "name": "ProvisioningSharepointFarm",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/CreatingNetworkInterface",
-        "Microsoft.Resources/deployments/CreatingAvailabilitySet",
-        "Microsoft.Resources/deployments/SettingUpLoadBalancer"
       ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('ProvisioningSQLUrl')]",
+          "uri": "[variables('provisioningSharepointUrl')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "spVMName": {
+            "value": "[variables('spVMName')]"
+          },
           "location": {
             "value": "[parameters('location')]"
           },
-          "sqlVMName": {
-            "value": "[variables('sqlVMName')]"
-          },
-          "sqlVMSize": {
-            "value": "[parameters('sqlVMSize')]"
-          },
-          "sqlAvailabilitySetName": {
-            "value": "[variables('sqlAvailabilitySetName')]"
-          },
-          "adminUsername": {
-            "value": "[parameters('adminUsername')]"
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
           },
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
+          "spVMSize": {
+            "value": "[parameters('spVMSize')]"
+          },
+          "spAvailabilitySetName": {
+            "value": "[variables('spAvailabilitySetName')]"
+          },
+          "spNicName": {
+            "value": "[variables('spNicName')]"
+          },
+          "spDataDisk": {
+            "value": "[variables('spDataDisk')]"
+          },
           "storageAccountName": {
             "value": "[parameters('storageAccountName')]"
-          },
-          "sqlDataDisk": {
-            "value": "[variables('sqlDataDisk')]"
-          },
-          "sqlLogDisk": {
-            "value": "[variables('sqlLogDisk')]"
-          },
-          "sqlNicName": {
-            "value": "[variables('sqlNicName')]"
           }
         }
       }
     }
+    
   ],
   "outputs": {
     "fqdn": {
-      "value": "[reference('SettingUpPublicIP').outputs.publicIpResourceId.value]",
+      "value": "[reference('SettingUpSharePointIP').outputs.publicIpResourceId.value]",
       "type": "string"
     }
   }
