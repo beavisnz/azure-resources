@@ -25,8 +25,7 @@
     },
     "spCANAT": {
       "type": "string"
-    },
-
+    }
   },
   "resources": [
     {
@@ -85,7 +84,8 @@
               "frontendPort": 8080,
               "backendPort": 8080,
               "enableFloatingIP": false
-           
+            }
+          }
         ]
       }
     }
