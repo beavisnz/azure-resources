@@ -51,12 +51,12 @@
       },
       "defaultValue": "10.0.2.0/24"
     },
-    "adNicIPAddress": {
+    "sqlNicIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "The IP address of the new AD VM"
+        "description": "The IP address of the new SQL VM"
       },
-      "defaultValue": "10.0.0.4"
+      "defaultValue": "10.0.1.4"
     },
     "adminUsername": {
       "type": "string",
@@ -70,16 +70,29 @@
         "description": "The password forthe Administrator account of the new VM and Domain"
       }
     },
-    "adVMSize": {
+    "sqlVMSize": {
       "type": "string",
       "allowedValues": [
         "Standard_D1_v2",
         "Standard_D2_v2",
       ],
       "metadata": {
-        "description": "The size of the AD VM Created"
+        "description": "The size of the SQL VM Created"
       },
-      "defaultValue": "Standard_D1_v2"
+      "defaultValue": "Standard_D2_v2"
+    },
+    "sqlServerServiceAccountUserName": {
+      "type": "string",
+      "metadata": {
+        "description": "The SQL Server Service account name"
+      },
+      "defaultValue": "sqlservice"
+    },
+    "sqlServerServiceAccountPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The SQL Server Service account password"
+      }
     },
     "baseUrl": {
       "type": "string",
@@ -106,27 +119,29 @@
     }
   },
   "variables": {
-    "adVMName": "[concat(parameters('sharepointFarmName'),'-ad')]",
+    "sqlVMName": "[concat(parameters('sharepointFarmName'),'-sql')]",
     "LBFE": "LBFE",
     "LBBE": "LBBE",
     "RDPNAT": "RDP",
-    "adNicName": "adNic",
+    "sqlNicName": "sqlNic",
     "adSubnetName": "adSubnet",
     "sqlSubnetName": "sqlSubnet",
     "spSubnetName": "spSubnet",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-    "adSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('adSubnetName'))]",
-    "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adNicName'))]",
-    "adLBName": "adLoadBalancer",
-    "adIPConfigID": "[concat(variables('adNicId'),'/ipConfigurations/ipconfig1')]",
-    "adlbID": "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]",
-    "adlbFEConfigID": "[concat(variables('adlbID'),'/frontendIPConfigurations/',variables('LBFE'))]",
-    "adRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',variables('RDPNAT'))]",
-    "adBEAddressPoolID": "[concat(variables('adlbID'),'/backendAddressPools/',variables('LBBE'))]",
-    "adDataDisk": "ADDataDisk",
-    "adDataDiskSize": 1000,
-    "adpublicIPAddressName": "adpublicIP",
-    "adAvailabilitySetName": "adAvailabiltySet",
+    "sqlSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('sqlSubnetName'))]",
+    "sqlNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('sqlNicName'))]",
+    "sqlLBName": "sqlLoadBalancer",
+    "sqlIPConfigID": "[concat(variables('sqlNicId'),'/ipConfigurations/ipconfig1')]",
+    "sqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('sqlLBName'))]",
+    "sqllbFEConfigID": "[concat(variables('sqllbID'),'/frontendIPConfigurations/',variables('LBFE'))]",
+    "sqlRDPNATRuleID": "[concat(variables('sqllbID'),'/inboundNatRules/',variables('RDPNAT'))]",
+    "sqlBEAddressPoolID": "[concat(variables('sqllbID'),'/backendAddressPools/',variables('LBBE'))]",
+    "sqlDataDisk": "SQLDataDisk",
+    "sqlDataDiskSize": 1000,
+    "sqlLogDisk": "SQLLogDisk",
+    "sqlLogDiskSize": 1000,
+    "sqlpublicIPAddressName": "sqlpublicIP",
+    "sqlAvailabilitySetName": "sqlAvailabiltySet",
     "publicIPAddressType": "Dynamic",
     "subnets": [
       {
@@ -152,9 +167,7 @@
     "CreatingAvailabilitySetUrl": "[concat(parameters('localUrl'),'/availabilitySet.json')]",
     "setupLBUrl": "[concat(parameters('localUrl'),'/loadBalancer.json')]",
     "creatingNICUrl": "[concat(parameters('localUrl'),'/creatingNIC.json')]",
-    "ProvisioningADDomainControllerUrl": "[concat(parameters('localUrl'),'/provisioningDomainController.json')]",
-    
-    "vnetwithDNSTemplateUrl": "[concat(parameters('baseUrl'),'/vnet-with-dns-server.json')]"
+    "ProvisioningSQLUrl": "[concat(parameters('localUrl'),'/provisioningSQL.json')]"
   },
   "resources": [
     
@@ -173,7 +186,7 @@
             "value": "[parameters('location')]"
           },
           "publicIPAddressName": {
-            "value": "[variables('adpublicIPAddressName')]"
+            "value": "[variables('sqlpublicIPAddressName')]"
           },
           "publicIPAddressType": {
             "value": "[variables('publicIPAddressType')]"
@@ -196,7 +209,7 @@
             "value": "[parameters('location')]"
           },
           "availabilitySetName": {
-            "value": "[variables('adAvailabilitySetName')]"
+            "value": "[variables('sqlAvailabilitySetName')]"
           }
         }
       }
@@ -228,7 +241,7 @@
             "value": "[variables('RDPNAT')]"
           },
           "lbName": {
-            "value": "[variables('adlbName')]"
+            "value": "[variables('sqllbName')]"
           },
           "publicIpResourceId": {
             "value": "[reference('SettingUpPublicIP').outputs.publicIpResourceId.value]"
@@ -254,19 +267,19 @@
             "value": "[parameters('location')]"
           },
           "NicName": {
-            "value": "[variables('adNicName')]"
+            "value": "[variables('sqlNicName')]"
           },
           "NicIPAddress": {
-            "value": "[parameters('adNicIPAddress')]"
+            "value": "[parameters('sqlNicIPAddress')]"
           },
           "SubnetRef": {
-            "value": "[variables('adSubnetRef')]"
+            "value": "[variables('sqlSubnetRef')]"
           },
           "BEAddressPoolID": {
-            "value": "[variables('adBEAddressPoolID')]"
+            "value": "[variables('sqlBEAddressPoolID')]"
           },
           "RDPNATRuleID": {
-            "value": "[variables('adRDPNATRuleID')]"
+            "value": "[variables('sqlRDPNATRuleID')]"
           },
           "LBBE": {
             "value": "[variables('LBBE')]"
@@ -324,37 +337,48 @@
       }
     },
     {
-      "name": "UpdatingDNStoPrimaryADVM",
+      "name": "ProvisioningSQLServer",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/ProvisioningADDomainController"
       ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('vnetwithDNSTemplateUrl')]",
+          "uri": "[variables('ProvisioningSQLUrl')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "location": {
             "value": "[parameters('location')]"
           },
-          "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
+          "sqlVMName": {
+            "value": "[variables('sqlVMName')]"
           },
-          "virtualNetworkAddressRange": {
-            "value": "[parameters('virtualNetworkAddressRange')]"
+          "sqlVMSize": {
+            "value": "[parameters('sqlVMSize')]"
           },
-          "subnets": {
-            "value": "[variables('subnets')]"
+          "sqlAvailabilitySetName": {
+            "value": "[variables('sqlAvailabilitySetName')]"
           },
-          "DNSServerAddress": {
-            "value": [
-              "[parameters('adNicIPAddress')]"
-            ]
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "storageAccountName": {
+            "value": "[parameters('storageAccountName')]"
+          },
+          "sqlDataDisk": {
+            "value": "[variables('sqlDataDisk')]"
+          },
+          "sqlLogDisk": {
+            "value": "[variables('sqlLogDisk')]"
+          },
+          "sqlNicName": {
+            "value": "[variables('sqlNicName')]"
           }
-        }
       }
     }
   ],
