@@ -10,4 +10,4 @@ if ( !$resourcegroup ) {
     New-AzureRmResourceGroup -Name $resourcegroupname -Location "Australia East"
 }
 
-New-AzureRmResourceGroupDeployment -Name $deploymentname -ResourceGroupName $resourcegroupname -TemplateUri 'OneDrive - Sysdoc NZ\Azure\Templates\SharePointFarm\base.json'
+New-AzureRmResourceGroupDeployment -Name $deploymentname -ResourceGroupName $resourcegroupname -TemplateUri 'C:\GitHub\azure-resources\Templates\SharePointFarm\base.json'

@@ -99,7 +99,7 @@
     }
   },
   "variables": {
-    "adSubnetName": "adSubnet",
+    "adSubnetName": "dcSubnet",
     "sqlSubnetName": "sqlSubnet",
     "spSubnetName": "spSubnet",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",

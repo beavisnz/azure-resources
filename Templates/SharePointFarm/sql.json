@@ -74,7 +74,7 @@
       "type": "string",
       "allowedValues": [
         "Standard_D1_v2",
-        "Standard_D2_v2",
+        "Standard_D2_v2"
       ],
       "metadata": {
         "description": "The size of the SQL VM Created"
@@ -124,7 +124,7 @@
     "LBBE": "LBBE",
     "RDPNAT": "RDP",
     "sqlNicName": "sqlNic",
-    "adSubnetName": "adSubnet",
+    "adSubnetName": "dcSubnet",
     "sqlSubnetName": "sqlSubnet",
     "spSubnetName": "spSubnet",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
@@ -140,7 +140,7 @@
     "sqlDataDiskSize": 1000,
     "sqlLogDisk": "SQLLogDisk",
     "sqlLogDiskSize": 1000,
-    "sqlpublicIPAddressName": "sqlpublicIP",
+    "sqlpublicIPAddressName": "sqlPublicIP",
     "sqlAvailabilitySetName": "sqlAvailabiltySet",
     "publicIPAddressType": "Dynamic",
     "subnets": [

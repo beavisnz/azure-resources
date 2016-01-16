@@ -74,7 +74,7 @@
       "type": "string",
       "allowedValues": [
         "Standard_D1_v2",
-        "Standard_D2_v2",
+        "Standard_D2_v2"
       ],
       "metadata": {
         "description": "The size of the AD VM Created"
@@ -106,27 +106,27 @@
     }
   },
   "variables": {
-    "adVMName": "[concat(parameters('sharepointFarmName'),'-ad')]",
+    "adVMName": "[concat(parameters('sharepointFarmName'),'-dc')]",
     "LBFE": "LBFE",
     "LBBE": "LBBE",
     "RDPNAT": "RDP",
-    "adNicName": "adNic",
-    "adSubnetName": "adSubnet",
+    "adNicName": "dcNic",
+    "adSubnetName": "dcSubnet",
     "sqlSubnetName": "sqlSubnet",
     "spSubnetName": "spSubnet",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
     "adSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('adSubnetName'))]",
     "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adNicName'))]",
-    "adLBName": "adLoadBalancer",
+    "adLBName": "dcLoadBalancer",
     "adIPConfigID": "[concat(variables('adNicId'),'/ipConfigurations/ipconfig1')]",
     "adlbID": "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]",
     "adlbFEConfigID": "[concat(variables('adlbID'),'/frontendIPConfigurations/',variables('LBFE'))]",
     "adRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',variables('RDPNAT'))]",
     "adBEAddressPoolID": "[concat(variables('adlbID'),'/backendAddressPools/',variables('LBBE'))]",
-    "adDataDisk": "ADDataDisk",
+    "adDataDisk": "DCDataDisk",
     "adDataDiskSize": 1000,
-    "adpublicIPAddressName": "adpublicIP",
-    "adAvailabilitySetName": "adAvailabiltySet",
+    "adpublicIPAddressName": "dcPublicIP",
+    "adAvailabilitySetName": "dcAvailabiltySet",
     "publicIPAddressType": "Dynamic",
     "subnets": [
       {
