@@ -28,35 +28,35 @@
       "metadata": {
         "description": "The address range of the new VNET "
       },
-      "defaultValue": "10.0.0.0/16"
+      "defaultValue": "10.100.0.0/16"
     },
     "adSubnet": {
       "type": "string",
       "metadata": {
         "description": "The address range of the AD subnet created in the new VNET"
       },
-      "defaultValue": "10.0.0.0/24"
+      "defaultValue": "10.100.0.0/24"
     },
     "sqlSubnet": {
       "type": "string",
       "metadata": {
         "description": "The address range of the SQL subnet created in the new VNET"
       },
-      "defaultValue": "10.0.1.0/24"
+      "defaultValue": "10.100.0.0/24"
     },
     "spSubnet": {
       "type": "string",
       "metadata": {
         "description": "The address range of the SP subnet created in the new VNET"
       },
-      "defaultValue": "10.0.2.0/24"
+      "defaultValue": "10.100.0.0/24"
     },
     "adNicIPAddress": {
       "type": "string",
       "metadata": {
         "description": "The IP address of the new AD VM"
       },
-      "defaultValue": "10.0.0.4"
+      "defaultValue": "10.100.0.4"
     },
     "adminUsername": {
       "type": "string",
@@ -111,9 +111,9 @@
     "LBBE": "LBBE",
     "RDPNAT": "RDP",
     "adNicName": "dcNic",
-    "adSubnetName": "dcSubnet",
-    "sqlSubnetName": "sqlSubnet",
-    "spSubnetName": "spSubnet",
+    "adSubnetName": "Subnet1",
+    "sqlSubnetName": "Subnet1",
+    "spSubnetName": "Subnet1",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
     "adSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('adSubnetName'))]",
     "adNicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('adNicName'))]",
@@ -322,7 +322,7 @@
           }
         }
       }
-    },
+    }/*,
     {
       "name": "UpdatingDNStoPrimaryADVM",
       "type": "Microsoft.Resources/deployments",
@@ -356,7 +356,7 @@
           }
         }
       }
-    }
+    }*/
   ],
   "outputs": {
     "fqdn": {

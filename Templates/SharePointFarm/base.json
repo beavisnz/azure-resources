@@ -152,7 +152,7 @@
           }
         }
       }
-    },
+    }/*,
     {
       "name": "SettingUpVirtualNetwork",
       "type": "Microsoft.Resources/deployments",
@@ -178,7 +178,7 @@
           }
         }
       }
-    }
+    }*/
   ],
   "outputs": {
     "fqdn": {
