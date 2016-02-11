@@ -50,9 +50,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "MicrosoftSharePoint",
-            "offer": "MicrosoftSharePointServer",
-            "sku": "2013",
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter",
             "version": "latest"
           },
           "osDisk": {
